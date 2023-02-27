@@ -1,5 +1,6 @@
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const inputEl = document.querySelector('#datetime-picker');
 const daysEl = document.querySelector('[data-days]');
@@ -8,6 +9,7 @@ const minutesEl = document.querySelector('[data-minutes]');
 const secondsEl = document.querySelector('[data-seconds]');
 const startBtn = document.querySelector('[data-start]');
 let intervalId = null;
+let targetTime = null;
 
 startBtn.setAttribute('disabled', 'true');
 
@@ -17,32 +19,17 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    const targetTime = selectedDates[0].getTime();
+    targetTime = selectedDates[0].getTime();
     const startTime = Date.now();
 
     if (targetTime < startTime) {
-      alert('Please choose a date in the future');
-    } else {
-      startBtn.removeAttribute('disabled');
-      startBtn.addEventListener('click', () => {
-        startBtn.setAttribute('disabled', 'true');
-        intervalId = setInterval(() => {
-          const currentTime = Date.now();
-          const deltaTime = targetTime - currentTime;
-
-          if (deltaTime <= 1000 && deltaTime > 0) {
-            clearInterval(intervalId);
-          }
-
-          const { days, hours, minutes, seconds } = convertMs(deltaTime);
-
-          daysEl.textContent = days;
-          hoursEl.textContent = hours;
-          minutesEl.textContent = minutes;
-          secondsEl.textContent = seconds;
-        }, 1000);
-      });
+      Notify.failure('Please choose a date in the future');
+      if (startBtn.getAttribute('disabled')) {
+        return;
+      }
     }
+    startBtn.disabled = false;
+    startBtn.addEventListener('click', timer);
   },
 };
 
@@ -72,24 +59,30 @@ function convertMs(ms) {
 function addLeadingZero(value) {
   return String(value).padStart(2, '0');
 }
+function timer() {
+  inputEl.setAttribute('disabled', 'true');
+  startBtn.disabled = true;
 
-function fdfsd(value) {
-  console.log(value);
-  startBtn.setAttribute('disabled', 'true');
+  let currentTime = Date.now();
+  let deltaTime = targetTime - currentTime;
+  updateTimerLook(deltaTime);
+
   intervalId = setInterval(() => {
-    console.log(value);
-    const currentTime = Date.now();
-    const deltaTime = targetTime - currentTime;
+    currentTime = Date.now();
+    deltaTime = targetTime - currentTime;
 
-    if (deltaTime <= 1000 && deltaTime > 0) {
+    if (deltaTime < 1000 && deltaTime >= 0) {
       clearInterval(intervalId);
     }
-
-    const { days, hours, minutes, seconds } = convertMs(deltaTime);
-
-    daysEl.textContent = days;
-    hoursEl.textContent = hours;
-    minutesEl.textContent = minutes;
-    secondsEl.textContent = seconds;
+    updateTimerLook(deltaTime);
   }, 1000);
+}
+
+function updateTimerLook(time) {
+  const { days, hours, minutes, seconds } = convertMs(time);
+
+  daysEl.textContent = days;
+  hoursEl.textContent = hours;
+  minutesEl.textContent = minutes;
+  secondsEl.textContent = seconds;
 }

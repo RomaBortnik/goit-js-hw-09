@@ -9,8 +9,8 @@ let intervalId = null;
 
 function onButtonStart(event) {
   document.body.style.backgroundColor = getRandomHexColor();
-  stopBtn.removeAttribute('disabled');
   startBtn.setAttribute('disabled', 'true');
+  stopBtn.disabled = false;
 
   intervalId = setInterval(() => {
     document.body.style.backgroundColor = getRandomHexColor();
@@ -18,8 +18,8 @@ function onButtonStart(event) {
 }
 
 function onButtonStop(event) {
-  startBtn.removeAttribute('disabled');
-  stopBtn.setAttribute('disabled', 'true');
+  startBtn.disabled = false;
+  stopBtn.disabled = true;
 
   clearInterval(intervalId);
 }
