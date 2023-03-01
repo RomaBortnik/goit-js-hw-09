@@ -33,7 +33,5 @@ function onFormSubmit(event) {
       })
       .finally((delayTime += Number(step.value)));
   }
-  delay.value = '';
-  amount.value = '';
-  step.value = '';
+  submitForm.reset();
 }
